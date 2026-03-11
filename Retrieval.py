@@ -1,66 +1,81 @@
-from embedding import cosine_similarity, embed
-from sentence_transformers import SentenceTransformer
-from ingestion import loadPages
-import requests
-import json
+from embedding import embed, cosine_similarity, model
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+DEFAULT_SIMILARITY_THRESHOLD = 0.3
 
-def retrieve_relevant(query, chunks, doc_embeddings, top_k=3):
-    query_embed = model.encode(query)
-    distances = cosine_similarity(query_embed, doc_embeddings)
-    vals = []
-    for doc, dist in zip(chunks, distances):
-        vals.append((doc, dist))
-    vals.sort(key=lambda x: x[1], reverse=True)
-    return vals[:top_k]
-    
-if __name__ == "__main__":
-        chunks, doc_embeddings = embed()
-        query="Explain MUX and DEMUX with examples."
-        results=retrieve_relevant(query, chunks, doc_embeddings,top_k=3)
-        for res in results:
-            print(f"Score: {res[1]}")
-            print(f"Content: {res[0].page_content}")
-    
-        cont = "\n\n".join(
-        [chunk.page_content for chunk, score in results])
 
-        response=[]
-        prompt = """
-        Answer the question using ONLY the context below.
-        You MUST include a Sources section at the end.
+def retrieve(query, top_k=5, similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD):
 
-        Context:
-        {context}
+    chunks, embeddings = embed()
 
-        Question:
-        {query}
+    print(f"[DEBUG] Retrieving chunks for query: '{query}'")
+    print(f"[DEBUG] Using similarity threshold: {similarity_threshold}")
 
-        Sources:
-       {sources}
+    query_embedding = model.encode(query, normalize_embeddings=True)
 
-     Answer:
-    """
+    similarities = cosine_similarity(query_embedding, embeddings)
 
-url='http://localhost:11434/api/generate'
+    scored_chunks = [
+        (chunk, sim)
+        for chunk, sim in zip(chunks, similarities)
+    ]
 
-data={
-     "model": "llama2",  
-    "prompt":prompt.format(context=cont, query=query,sources=context),
-     "stream":True
-}
+    scored_chunks.sort(key=lambda x: x[1], reverse=True)
 
-headers={'Content-Type': 'application/json'}
-response=requests.post(url,data=json.dumps(data), headers=headers, stream=True)
+    filtered_chunks = [
+        (chunk, sim)
+        for chunk, sim in scored_chunks
+        if sim >= similarity_threshold
+    ][:top_k]
 
-try:
-    for line in response.iter_lines():
-        if line:
-            decoded_line=json.loads(line.decode('utf-8'))
-            if "response" in decoded_line:
-                response.append(decoded_line['response'])
+    if not filtered_chunks:
+        print("[DEBUG] No chunks passed the similarity threshold")
 
-finally:
-    response.close()
-    print(' '.join(response))
+    print(f"[DEBUG] Found {len(filtered_chunks)} relevant chunks")
+
+    results = [
+        {
+            "content": chunk.page_content,
+            "similarity": float(sim),
+            "source": chunk.metadata.get("source", "unknown"),
+            "page": chunk.metadata.get("page", "unknown"),
+            "chapter": chunk.metadata.get("chapter", "unknown"),
+            "section": chunk.metadata.get("section", "unknown"),
+            "subsection": chunk.metadata.get("subsection", "unknown")
+        }
+        for chunk, sim in filtered_chunks
+    ]
+
+    print("\n[DEBUG] RETRIEVED CHUNKS ")
+    for i, result in enumerate(results, 1):
+        print(f"\n[Chunk {i}]")
+        print(f"  Similarity: {result['similarity']:.4f}")
+        print(f"  Source: {result['source']}")
+        print(f"  Location: {result['chapter']} > {result['section']} > {result['subsection']}")
+        print(f"  Content: {result['content'][:150]}...")
+    print("[DEBUG] ===== END CHUNKS =====\n")
+
+    return results
+
+def format_context_for_generation(retrieved_chunks):
+
+    if not retrieved_chunks:
+        return "No relevant context found."
+
+    context_parts = []
+
+    for i, chunk in enumerate(retrieved_chunks, 1):
+
+        citation = f"[{chunk['source']} | p{chunk['page']}]"
+
+        if chunk.get("chapter") and chunk["chapter"] != "unknown":
+            citation += f" | Chapter: {chunk['chapter']}"
+
+        context_parts.append(
+            f"{i}. {chunk['content']}\n   Source: {citation}"
+        )
+
+    context = "\n\n".join(context_parts)
+
+    print(f"[DEBUG] Formatted {len(retrieved_chunks)} chunks for generation")
+
+    return context
