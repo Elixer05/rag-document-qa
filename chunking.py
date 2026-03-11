@@ -1,4 +1,4 @@
-from sympy import re
+import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ingestion import loadPages
 

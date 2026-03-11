@@ -3,7 +3,7 @@ from retrieval import retrieve, format_context_for_generation
 
 
 API_URL = "http://localhost:11434/api/generate"  
-MODEL_NAME = "llama3"
+MODEL_NAME = "llama2"
 
 
 def build_prompt(query, context):
