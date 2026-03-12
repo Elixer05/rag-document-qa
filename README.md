@@ -57,7 +57,7 @@ Flow:
 * NumPy
 * scikit-learn (cosine similarity)
 * Transformer-based embedding model (SentenceTransformers)
-* Local LLM using Ollama (Llama 3)
+* Local LLM using Ollama (Llama 2)
 
 ---
 
@@ -114,7 +114,7 @@ pip install -r requirements.txt
 Make sure Ollama is running locally with the required model.
 
 ```
-ollama run llama3
+ollama run llama2
 ```
 
 Run the application
