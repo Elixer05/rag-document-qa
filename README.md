@@ -33,7 +33,7 @@ Flow:
            Prompt Construction
                      │
                      ▼
-          LLM (Ollama - Llama3)
+          LLM (Ollama - Llama2)
                      │
                      ▼
                 Final Answer
@@ -134,12 +134,3 @@ What is the working principle of a PN junction diode?
 ```
 
 The system retrieves the most relevant sections from the document and generates a context-grounded answer.
-
----
-
-## Future Improvements
-
-* Add vector database support (FAISS / Chroma)
-* Web interface for querying documents
-* Support for multiple document collections
-* Retrieval evaluation metrics
