@@ -25,28 +25,27 @@ def cosine_similarity(query_vector, document_vectors):
 
 
 def embed():
-    """Load or compute embeddings for all chunks."""
+   
     global _cached_chunks, _cached_embeddings
 
-    # Return cached embeddings if already loaded in memory
     if _cached_chunks is not None and _cached_embeddings is not None:
         return _cached_chunks, _cached_embeddings
 
     if os.path.exists(EMBEDDINGS_FILE) and os.path.exists(CHUNKS_FILE):
-        print("[DEBUG] Loading cached embeddings from disk")
+        print(" Loading cached embeddings from disk")
         _cached_embeddings = np.load(EMBEDDINGS_FILE)
 
         with open(CHUNKS_FILE, 'rb') as f:
             _cached_chunks = pickle.load(f)
 
-        print(f"[DEBUG] Loaded {len(_cached_chunks)} chunks with embeddings")
+        print(f" Loaded {len(_cached_chunks)} chunks with embeddings")
         return _cached_chunks, _cached_embeddings
 
-    print("[DEBUG] Computing embeddings for first time")
+    print(" Computing embeddings for first time")
     _cached_chunks = chunk_docs()
 
     texts = [chunk.page_content for chunk in _cached_chunks]
-    print(f"[DEBUG] Encoding {len(texts)} text chunks")
+    print(f"Encoding {len(texts)} text chunks")
 
     _cached_embeddings = model.encode(texts)
     _cached_embeddings = np.array(_cached_embeddings)
@@ -58,5 +57,5 @@ def embed():
     with open(CHUNKS_FILE, 'wb') as f:
         pickle.dump(_cached_chunks, f)
 
-    print(f"[DEBUG] Saved {len(_cached_chunks)} chunks with embeddings")
+    print(f" Saved {len(_cached_chunks)} chunks with embeddings")
     return _cached_chunks, _cached_embeddings

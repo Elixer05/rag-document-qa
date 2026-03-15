@@ -2,13 +2,12 @@ from embedding import embed, cosine_similarity, model
 
 DEFAULT_SIMILARITY_THRESHOLD = 0.3
 
-
 def retrieve(query, top_k=5, similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD):
 
     chunks, embeddings = embed()
 
     print(f" Retrieving chunks for query: '{query}'")
-    print(f" Using similarity threshold: {similarity_threshold}")
+    print(f"Using similarity threshold: {similarity_threshold}")
 
     query_embedding = model.encode(query, normalize_embeddings=True)
 
@@ -28,9 +27,9 @@ def retrieve(query, top_k=5, similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD):
     ][:top_k]
 
     if not filtered_chunks:
-        print(" No chunks passed the similarity threshold")
+        print("No chunks passed the similarity threshold")
 
-    print(f" Found {len(filtered_chunks)} relevant chunks")
+    print(f"Found {len(filtered_chunks)} relevant chunks")
 
     results = [
         {
@@ -45,14 +44,14 @@ def retrieve(query, top_k=5, similarity_threshold=DEFAULT_SIMILARITY_THRESHOLD):
         for chunk, sim in filtered_chunks
     ]
 
-    print("\n RETRIEVED CHUNKS ")
+    print("\n[DEBUG] RETRIEVED CHUNKS ")
     for i, result in enumerate(results, 1):
         print(f"\n[Chunk {i}]")
         print(f"  Similarity: {result['similarity']:.4f}")
         print(f"  Source: {result['source']}")
         print(f"  Location: {result['chapter']} > {result['section']} > {result['subsection']}")
         print(f"  Content: {result['content'][:150]}...")
-    print(" END CHUNKS\n")
+    print("  END CHUNKS \n")
 
     return results
 
@@ -76,6 +75,6 @@ def format_context_for_generation(retrieved_chunks):
 
     context = "\n\n".join(context_parts)
 
-    print(f" Formatted {len(retrieved_chunks)} chunks for generation")
+    print(f"Formatted {len(retrieved_chunks)} chunks for generation")
 
     return context
