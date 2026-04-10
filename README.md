@@ -1,7 +1,7 @@
 # RAG Document Question Answering System
 
 > Ask any question from a 2000+ page academic textbook and get a context-grounded answer in seconds.
-> Built with SentenceTransformers, cosine similarity retrieval, and a local Llama 2 LLM — **no API keys, no data leaving your machine.**
+> Built with SentenceTransformers, cosine similarity retrieval, and a local phi3 LLM — **no API keys, no data leaving your machine.**
 
 ---
 
@@ -119,8 +119,8 @@ rag-document-qa/
 | `sentence-transformers` | Semantic embedding generation |
 | `scikit-learn` | Cosine similarity computation |
 | `numpy` | Vector operations |
-| `ollama` | Local LLM inference (Llama 2) |
-| `PyMuPDF / pdfplumber` | PDF text extraction |
+| `phi3` | Local LLM inference  |
+
 
 ---
 
@@ -144,9 +144,9 @@ pip install -r requirements.txt
 
 ## Running the System
 
-**1. Start Ollama with Llama 2**
+**1. Start ollama phi3**
 ```bash
-ollama run llama2
+ollama pull phi3
 ```
 
 **2. Add your documents**
@@ -176,7 +176,7 @@ Ask a question (or type 'quit' to exit): What is a PN junction diode?
 
 - **No persistent vector database** — embeddings are cached to disk but recomputed on new documents (FAISS integration planned)
 - **Retrieval quality depends on chunk boundaries** — questions spanning multiple sections may miss context
-- **Llama 2 answer quality** is limited by model size; larger models would improve generation
+- **phi3 answer quality** is limited by model size; larger models would improve generation
 - **No hallucination detection** — answers are grounded in retrieved context but not formally verified
 
 ---
