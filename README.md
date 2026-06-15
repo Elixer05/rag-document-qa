@@ -1,12 +1,7 @@
 # RAG Document Question Answering System
 
-<<<<<<< HEAD
 > Ask any question from a large academic PDF and get a context-grounded cited answer in seconds.
 > Built with LanchChain, SentenceTransformers, cosine similarity retrieval, and a local phi3 LLM — **no API keys, no data leaving your machine.**
-=======
-> Ask any question from a 2000+ page academic textbook and get a context-grounded answer in seconds.
-> Built with SentenceTransformers, cosine similarity retrieval, and a local phi3 LLM — **no API keys, no data leaving your machine.**
->>>>>>> 280d25f824af448ee62ec8c6f02a67a82b62b21f
 
 ---
 
@@ -106,17 +101,10 @@ rag-document-qa/
 |---|---|
 | `langchain` | Document loading and intelligent text splitting |
 | `sentence-transformers` | Semantic embedding generation |
-<<<<<<< HEAD
 | `numpy` | Vector operations and cosine similarity |
 | `ollama` | Local LLM inference (phi3) |
 | `streamlit` | Web-based frontend interface |
 | `pickle` | Embedding cache persistence |
-=======
-| `scikit-learn` | Cosine similarity computation |
-| `numpy` | Vector operations |
-| `phi3` | Local LLM inference  |
-
->>>>>>> 280d25f824af448ee62ec8c6f02a67a82b62b21f
 
 ---
 
@@ -140,17 +128,11 @@ pip install -r requirements.txt
 
 ## Running the System
 
-<<<<<<< HEAD
 ### Option 1 — Streamlit Web Interface (recommended)
 
 **1. Start Ollama with phi3**
 ```bash
 ollama run phi3
-=======
-**1. Start ollama phi3**
-```bash
-ollama pull phi3
->>>>>>> 280d25f824af448ee62ec8c6f02a67a82b62b21f
 ```
 
 **2. Launch the Streamlit app**
@@ -195,7 +177,6 @@ Ask a question (or type 'quit' to exit): What is a PN junction diode?
 ---
 ## Limitations & Known Tradeoffs
 
-<<<<<<< HEAD
 - **Local LLM only** — generation requires Ollama running locally; 
   cloud deployment needs Groq or OpenAI API integration
 - **Page number offset** — PyPDFLoader uses zero-based indexing; 
@@ -206,13 +187,6 @@ Ask a question (or type 'quit' to exit): What is a PN junction diode?
   improve generation quality
 - **No hallucination detection** — answers are grounded in retrieved 
   context but not formally verified
-=======
-- **No persistent vector database** — embeddings are cached to disk but recomputed on new documents (FAISS integration planned)
-- **Retrieval quality depends on chunk boundaries** — questions spanning multiple sections may miss context
-- **phi3 answer quality** is limited by model size; larger models would improve generation
-- **No hallucination detection** — answers are grounded in retrieved context but not formally verified
-
->>>>>>> 280d25f824af448ee62ec8c6f02a67a82b62b21f
 ---
 
 ## Author
