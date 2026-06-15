@@ -1,7 +1,7 @@
 # RAG Document Question Answering System
 
-> Ask any question from a 2000+ page academic textbook and get a context-grounded answer in seconds.
-> Built with SentenceTransformers, cosine similarity retrieval, and a local Llama 2 LLM — **no API keys, no data leaving your machine.**
+> Ask any question from a large academic PDF and get a context-grounded cited answer in seconds.
+> Built with LanchChain, SentenceTransformers, cosine similarity retrieval, and a local phi3 LLM — **no API keys, no data leaving your machine.**
 
 ---
 
@@ -13,35 +13,13 @@ Built for academic textbooks but designed to work on any structured PDF document
 
 ---
 
-## Demo
-
-### Question: *"Define a BJT"*
-
-**Retrieved:** 5 chunks from Chapters 3, 5, 7, 8 (similarity scores: 0.49 – 0.57)
-
-**Answer:**
-> A bipolar junction transistor (BJT) is a type of semiconductor device whose functioning involves both majority and minority charge carriers. It is a 3-layer device containing both types of semiconductor material (either in p-n-p or n-p-n form).
-
----
-
-### Question: *"What are the characteristics of a BJT?"*
-
-**Retrieved:** 5 chunks across Chapters 3, 7, 8 (top similarity: 0.59)
-
-**Answer:**
-> 1. **Three-terminal device** — Emitter (E), Collector (C), and Base (B)
-> 2. **Majority and minority carriers** — involves both hole and electron flow
-> 3. **Linear/active operating region** — current flows in proportion to applied voltage
-> 4. **Stability factor (S)** — indicates degree of change in operating point due to temperature
-> 5. **Forward-biased junction** — typically 0.6 to 0.7 V
-> 6. **Leakage current** — present due to minority carriers
-
----
-
 ## Architecture
 
 ```
 User Query
+    │
+    ▼
+Streamlit Frontend (frontend.py)
     │
     ▼
 Retrieval Module
@@ -57,7 +35,7 @@ Top-K Relevant Chunks (with source + location)
 Prompt Construction
     │
     ▼
-Local LLM (Ollama — Llama 2)
+Local LLM (Ollama — phi3)
     │
     ▼
 Context-Grounded Answer
@@ -76,20 +54,24 @@ Context-Grounded Answer
 | Embedding model | SentenceTransformers | Strong semantic similarity, runs locally without API |
 | Similarity metric | Cosine similarity | Scale-invariant, effective for dense embeddings |
 | Retrieval threshold | 0.3 minimum similarity | Filters noise while preserving recall |
-| LLM | Ollama (Llama 2) | Fully local — no data leaves the machine |
+| LLM | Ollama (phi3) | Fully local — no data leaves the machine |
+| Text splitter | LangChain RecursiveCharacterTextSplitter | Intelligent boundary-aware chunking |
 | Metadata filtering | Chapter/section aware | Allows scoped queries within specific document regions |
 
 ---
 
 ## Features
 
-- **4,953 searchable chunks** indexed from 2000+ page textbooks
+- Multi-PDF upload and processing via Streamlit sidebar
 - Overlapping chunking (800 tokens, 150 overlap) for boundary-safe retrieval
-- Chapter-aware metadata filtering before similarity search
-- Cosine similarity ranking with configurable threshold
+- Semantic similarity ranking with configurable threshold
+- Retrieved context viewer showing similarity scores per chunk
+- Source-level citations — document name, page number, chapter, section
+- Markdown table generation for comparisons and structured answers
+- Conversation history with chat-style interface
 - Fully local inference — works offline, no API costs
 - Modular pipeline — each component is independently replaceable
-
+- Embedding cache — avoid recomputation on repeated sessions
 ---
 
 ## Project Structure
@@ -97,7 +79,8 @@ Context-Grounded Answer
 ```
 rag-document-qa/
 │
-├── app.py            # Main entry point and query loop
+├── app.py            # CLI entry point and query loop
+├── frontend.py       # Streamlit web interface
 ├── ingestion.py      # PDF loading and text extraction
 ├── chunking.py       # Overlapping token-based chunking with metadata
 ├── embedding.py      # SentenceTransformer embedding generation + caching
@@ -116,11 +99,12 @@ rag-document-qa/
 
 | Library | Purpose |
 |---|---|
+| `langchain` | Document loading and intelligent text splitting |
 | `sentence-transformers` | Semantic embedding generation |
-| `scikit-learn` | Cosine similarity computation |
-| `numpy` | Vector operations |
-| `ollama` | Local LLM inference (Llama 2) |
-| `PyMuPDF / pdfplumber` | PDF text extraction |
+| `numpy` | Vector operations and cosine similarity |
+| `ollama` | Local LLM inference (phi3) |
+| `streamlit` | Web-based frontend interface |
+| `pickle` | Embedding cache persistence |
 
 ---
 
@@ -144,20 +128,39 @@ pip install -r requirements.txt
 
 ## Running the System
 
-**1. Start Ollama with Llama 2**
+### Option 1 — Streamlit Web Interface (recommended)
+
+**1. Start Ollama with phi3**
 ```bash
-ollama run llama2
+ollama run phi3
 ```
 
-**2. Add your documents**
+**2. Launch the Streamlit app**
+```bash
+streamlit run frontend.py
+```
+
+**3. Upload your PDFs**
+Use the sidebar to upload one or more PDF files and click 
+"Process Documents."
+
+**4. Ask questions**
+Type any question in the chat input and receive a cited, 
+context-grounded answer.
+
+---
+
+### Option 2 — Command Line Interface
+
+**1. Add your documents**
 Place PDF files inside the `data/` directory.
 
-**3. Run the application**
+**2. Run the application**
 ```bash
 python app.py
 ```
 
-**4. Ask questions**
+**3. Ask questions**
 ```
 Ask a question (or type 'quit' to exit): What is a PN junction diode?
 ```
@@ -165,22 +168,26 @@ Ask a question (or type 'quit' to exit): What is a PN junction diode?
 ---
 ## Future Improvements
 
--  FAISS / ChromaDB vector database for scalable retrieval
--  Hybrid search (BM25 + dense vectors) for improved recall
--  Retrieval evaluation metrics (RAGAS — precision, faithfulness, recall@k)
--  Web interface (Streamlit / Gradio)
--  Support for multiple document collections
-
+- Cloud LLM integration (Groq API) for fully deployed version
+- FAISS / ChromaDB vector database for scalable retrieval
+- Hybrid search (BM25 + dense vectors) for improved recall
+- Retrieval evaluation metrics (RAGAS — precision, faithfulness, recall@k)
+- Voice query input via Faster-Whisper
+- Support for multiple simultaneous document collections
 ---
 ## Limitations & Known Tradeoffs
 
-- **No persistent vector database** — embeddings are cached to disk but recomputed on new documents (FAISS integration planned)
-- **Retrieval quality depends on chunk boundaries** — questions spanning multiple sections may miss context
-- **Llama 2 answer quality** is limited by model size; larger models would improve generation
-- **No hallucination detection** — answers are grounded in retrieved context but not formally verified
-
+- **Local LLM only** — generation requires Ollama running locally; 
+  cloud deployment needs Groq or OpenAI API integration
+- **Page number offset** — PyPDFLoader uses zero-based indexing; 
+  displayed page numbers may be off by one from the actual PDF
+- **Retrieval quality depends on chunk boundaries** — questions spanning 
+  multiple sections may miss context
+- **phi3 answer quality** is limited by model size; larger models would 
+  improve generation quality
+- **No hallucination detection** — answers are grounded in retrieved 
+  context but not formally verified
 ---
-
 
 ## Author
 

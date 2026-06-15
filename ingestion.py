@@ -23,13 +23,10 @@ def extract_metadata(text, curr_chapter, curr_title, curr_section, curr_subsec):
 
 def loadPages(path):
     doc=[]
-    for sub in os.listdir(path):
-        sub_path=os.path.join(path,sub)
-        if  not os.path.isdir(sub_path):
-            continue
-        for file in os.listdir(sub_path):
-            if file.endswith('.pdf'):
-                pdf_path=os.path.join(sub_path,file)
+    for file in os.listdir(path):
+       
+        if file.endswith('.pdf'):
+                pdf_path=os.path.join(path,file)
                 loader = PyPDFLoader(pdf_path)
                 curr_chapter = "Unknown"
                 curr_title = "Unknown"
