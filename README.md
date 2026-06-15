@@ -45,6 +45,8 @@ Context-Grounded Answer
 `PDF Ingestion → Chunking → Embedding → Indexed Storage → Retrieval → Generation`
 
 ---
+## Demo 
+<img width="800" height="418" alt="Animation-ezgif com-optimize" src="https://github.com/user-attachments/assets/5b514f94-46e3-417a-88bf-1841f3cd0a1e" />
 
 ## Key Design Decisions
 
